@@ -43,7 +43,7 @@ class FluxImageGenerator:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_id,
             torch_dtype=torch_dtype,
-            variant="fp16" if torch_dtype==torch.float16 else None,  # load half-precision weights if available
+            # keep default weights; we will cast after loading
             safety_checker=None,  # FLUX ships without explicit safety checker
             token=auth_token if auth_token else None,
         )
@@ -58,7 +58,8 @@ class FluxImageGenerator:
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
             self.pipe.scheduler.config
         )
-        self.pipe.to(device)
+        # Cast weights after loading (saves VRAM even without dedicate fp16 files)
+        self.pipe.to(device=device, dtype=torch_dtype)
         self.device = device
 
     @torch.inference_mode()
