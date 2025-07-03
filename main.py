@@ -11,8 +11,10 @@ Environment:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
+from s3_uploader import upload_files
 
 from prompt_refiner import refine_prompt
 from image_generator import FluxImageGenerator
@@ -38,9 +40,18 @@ def main(argv: list[str] | None = None) -> None:
     generator = FluxImageGenerator()
     paths = generator.generate(refined, num_images=args.num, seed=args.seed)
 
-    print("\nSaved:")
+    print("\nSaved locally:")
     for p in paths:
         print(" •", p.relative_to(Path.cwd()))
+
+    # Optional: automatically upload to S3 if env vars are set
+    bucket = os.getenv("S3_BUCKET")
+    if bucket:
+        prefix = os.getenv("S3_PREFIX", "")
+        print(f"\nUploading {len(paths)} image(s) to s3://{bucket}/{prefix}")
+        upload_files(bucket, paths, prefix)
+    else:
+        print("\nSet S3_BUCKET env-var to automatically upload the images to S3.")
 
 
 if __name__ == "__main__":
