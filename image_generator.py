@@ -72,8 +72,9 @@ class FluxImageGenerator:
             num_images_per_prompt=num_images,
             guidance_scale=7.0,
             generator=generator,
-            width=768,
-            height=768,
+            # SD/SDXL require dimensions divisible by 8; 512×512 ≈ 500×500 and is standard
+            width=512,
+            height=512,
         ).images
 
         saved_paths: List[Path] = []
