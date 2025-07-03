@@ -54,7 +54,7 @@ class FluxImageGenerator:
             self.pipe.enable_vae_tiling()          # reduce VAE memory
             # If VRAM is still insufficient, off-load parts of the model to CPU.
             # This keeps peak GPU usage under ~8 GB on SDXL at the cost of ~2× speed.
-            self.pipe.enable_model_cpu_offload(max_memory=24 * 1024 * 1024 * 1024)  # 24 GB
+            self.pipe.enable_model_cpu_offload()  # 24 GB
 
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
             self.pipe.scheduler.config
