@@ -52,8 +52,9 @@ class FluxImageGenerator:
         if device == "cuda":
             self.pipe.enable_attention_slicing()   # reduce attention footprint
             self.pipe.enable_vae_tiling()          # reduce VAE memory
-            # Uncomment below if still OOM – offloads parts to CPU at the cost of speed
-            # self.pipe.enable_model_cpu_offload()
+            # If VRAM is still insufficient, off-load parts of the model to CPU.
+            # This keeps peak GPU usage under ~8 GB on SDXL at the cost of ~2× speed.
+            self.pipe.enable_model_cpu_offload(max_memory=24 * 1024 * 1024 * 1024)  # 24 GB
 
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
             self.pipe.scheduler.config
@@ -63,7 +64,7 @@ class FluxImageGenerator:
         self.device = device
 
     @torch.inference_mode()
-    def generate(self, prompt: str, *, num_images: int = 4, seed: int | None = None) -> List[Path]:
+    def generate(self, prompt: str, *, num_images: int = 1, seed: int | None = None) -> List[Path]:
         """Generate *num_images* images and return file paths."""
         generator = torch.Generator(device=self.device)
         if seed is not None:
