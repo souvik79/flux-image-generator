@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 import torch
-from diffusers import AutoPipelineForText2Image, EulerAncestralDiscreteScheduler
+from diffusers import AutoPipelineForText2Image
 from dotenv import load_dotenv
 
 # Constants
@@ -56,11 +56,7 @@ class FluxImageGenerator:
             # This keeps peak GPU usage under ~8 GB on SDXL at the cost of ~2× speed.
             self.pipe.enable_model_cpu_offload()  # 24 GB
 
-        self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
-            self.pipe.scheduler.config
-        )
-        # Do NOT move the full pipeline to GPU when CPU offload is enabled – it
-        # defeats the purpose and OOMs.  Keep the device label for RNG.
+        # Keep the scheduler that FLUX provides; overriding can break custom sigma schedules
         self.device = device
 
     @torch.inference_mode()
