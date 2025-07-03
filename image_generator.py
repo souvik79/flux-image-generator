@@ -43,9 +43,18 @@ class FluxImageGenerator:
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_id,
             torch_dtype=torch_dtype,
+            variant="fp16" if torch_dtype==torch.float16 else None,  # load half-precision weights if available
             safety_checker=None,  # FLUX ships without explicit safety checker
             token=auth_token if auth_token else None,
         )
+
+        # Memory-saving tweaks so the model fits on 16 GB GPUs like RTX A4000
+        if device == "cuda":
+            self.pipe.enable_attention_slicing()   # reduce attention footprint
+            self.pipe.enable_vae_tiling()          # reduce VAE memory
+            # Uncomment below if still OOM – offloads parts to CPU at the cost of speed
+            # self.pipe.enable_model_cpu_offload()
+
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
             self.pipe.scheduler.config
         )
