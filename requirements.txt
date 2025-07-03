@@ -1,10 +1,12 @@
 openai>=1.10.0
-python-dotenv>=1.0.1
+python-dotenv>=1.1.0
 diffusers>=0.27.0
 transformers>=4.41.0
 torch      # let users install the right CUDA / CPU build
-accelerate>=0.29.0
 safetensors>=0.4.2
+# Runtime deps pulled in by diffusers/transformers, but list explicitly
+accelerate>=0.29.0
+pillow>=10.0.0
 # Optional UI libraries to be installed later when we add a web interface
 # gradio>=4.25.0
 # fastapi>=0.111.0
@@ -12,4 +14,3 @@ safetensors>=0.4.2
 protobuf>=4.25.3
 tokenizers>=0.19.1
 sentencepiece>=0.2.0
-accelerate
