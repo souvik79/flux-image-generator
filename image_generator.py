@@ -59,8 +59,8 @@ class FluxImageGenerator:
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_config(
             self.pipe.scheduler.config
         )
-        # Cast weights after loading (saves VRAM even without dedicate fp16 files)
-        self.pipe.to(device=device, dtype=torch_dtype)
+        # Do NOT move the full pipeline to GPU when CPU offload is enabled – it
+        # defeats the purpose and OOMs.  Keep the device label for RNG.
         self.device = device
 
     @torch.inference_mode()
