@@ -52,9 +52,9 @@ class FluxImageGenerator:
         if device == "cuda":
             self.pipe.enable_attention_slicing()   # reduce attention footprint
             self.pipe.enable_vae_tiling()          # reduce VAE memory
-            # If VRAM is still insufficient, off-load parts of the model to CPU.
-            # This keeps peak GPU usage under ~8 GB on SDXL at the cost of ~2× speed.
-            self.pipe.enable_model_cpu_offload()  # 24 GB
+            # Off-load modules one-by-one during the forward pass (most memory-friendly).
+            # This keeps peak GPU usage under ~6-7 GB on SDXL, suitable for a 16 GB A4000.
+            self.pipe.enable_sequential_cpu_offload()
 
         # Keep the scheduler that FLUX provides; overriding can break custom sigma schedules
         self.device = device
@@ -72,6 +72,8 @@ class FluxImageGenerator:
             num_images_per_prompt=num_images,
             guidance_scale=7.0,
             generator=generator,
+            width=768,
+            height=768,
         ).images
 
         saved_paths: List[Path] = []
