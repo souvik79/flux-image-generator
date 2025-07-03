@@ -31,8 +31,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
 
-    print("Refining prompt via OpenAI…", flush=True)
-    refined = refine_prompt(args.prompt)
+    # print("Refining prompt via OpenAI…", flush=True)
+    # refined = refine_prompt(args.prompt)
+    refined = args.prompt
     print("\nRaw prompt:     ", args.prompt)
     print("Refined prompt: ", refined)
 
