@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List
 
 import torch
-from diffusers import StableDiffusionPipeline, EulerAncestralDiscreteScheduler
+from diffusers import AutoPipelineForText2Image, EulerAncestralDiscreteScheduler
 from dotenv import load_dotenv
 
 # Constants
@@ -38,7 +38,9 @@ class FluxImageGenerator:
 
         auth_token = os.getenv("HUGGINGFACE_HUB_TOKEN")
 
-        self.pipe = StableDiffusionPipeline.from_pretrained(
+        # FLUX.1-dev is an SDXL-based model, so we use the automatic text-to-image
+        # pipeline loader which will pick StableDiffusionXLPipeline under the hood.
+        self.pipe = AutoPipelineForText2Image.from_pretrained(
             model_id,
             torch_dtype=torch_dtype,
             safety_checker=None,  # FLUX ships without explicit safety checker
