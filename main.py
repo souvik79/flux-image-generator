@@ -23,13 +23,17 @@ from image_generator import FluxImageGenerator
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Prompt-to-Image generator (CLI)")
     parser.add_argument("prompt", type=str, help="Raw prompt (quote if it has spaces)")
-    parser.add_argument("--num", "-n", type=int, default=4, help="Number of images to generate")
+    parser.add_argument("--num", "-n", type=int, default=1, help="Number of images to generate (max 6)")
     parser.add_argument("--seed", type=int, default=None, help="Optional random seed")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
+
+    if args.num > 6:
+        print("Requested more than 6 images – capping to 6 to conserve resources.")
+        args.num = 6
 
     # print("Refining prompt via OpenAI…", flush=True)
     # refined = refine_prompt(args.prompt)

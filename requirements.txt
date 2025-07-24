@@ -7,6 +7,9 @@ safetensors>=0.4.2
 # Runtime deps pulled in by diffusers/transformers, but list explicitly
 accelerate>=0.29.0
 pillow>=10.0.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+runpod>=1.0.0
 # Optional UI libraries to be installed later when we add a web interface
 # gradio>=4.25.0
 # fastapi>=0.111.0

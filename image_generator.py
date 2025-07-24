@@ -61,7 +61,12 @@ class FluxImageGenerator:
 
     @torch.inference_mode()
     def generate(self, prompt: str, *, num_images: int = 1, seed: int | None = None) -> List[Path]:
-        """Generate *num_images* images and return file paths."""
+        """Generate up to 6 images and return file paths."""
+        # Safety cap
+        if num_images > 6:
+            print("[FluxImageGenerator] Requested", num_images, "images – capping to 6.")
+            num_images = 6
+
         generator = torch.Generator(device=self.device)
         if seed is not None:
             generator = generator.manual_seed(seed)
@@ -84,4 +89,17 @@ class FluxImageGenerator:
             path = _OUTPUT_DIR / filename
             img.save(path)
             saved_paths.append(path)
+
+        # Auto-upload to S3 if env var is set
+        bucket = os.getenv("S3_BUCKET")
+        if bucket:
+            from s3_uploader import upload_files  # late import to avoid boto3 overhead if unused
+            prefix = os.getenv("S3_PREFIX", base)
+            upload_files(bucket, saved_paths, prefix)
+            # Optional: remove local copies to conserve disk space
+            if os.getenv("DELETE_LOCAL_AFTER_S3", "false").lower() == "true":
+                for p in saved_paths:
+                    p.unlink(missing_ok=True)
+                saved_paths = []
+
         return saved_paths
