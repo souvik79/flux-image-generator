@@ -98,8 +98,10 @@ class FluxImageGenerator:
             upload_files(bucket, saved_paths, prefix)
 
             # Build list of S3 URLs that correspond to each file
+            region = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+            base_url = f"https://{bucket}.s3.{region}.amazonaws.com"
             s3_urls = [
-                f"s3://{bucket}/{prefix.rstrip('/')}/{p.name}" if prefix else f"s3://{bucket}/{p.name}"
+                f"{base_url}/{prefix.rstrip('/')}/{p.name}" if prefix else f"{base_url}/{p.name}"
                 for p in saved_paths
             ]
 

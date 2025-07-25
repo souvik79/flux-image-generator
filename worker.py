@@ -70,7 +70,7 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
 
     files: List[str]
     if isinstance(paths[0], str):
-        # image_generator already returned a list of strings (local paths or S3 URLs)
+        # image_generator already returned a list of strings (local paths or HTTPS S3 URLs)
         files = paths
     else:
         # We got Path objects – return just the filenames

@@ -122,4 +122,52 @@ flux-image-generator/
 └── outputs/             # generated images
 ```
 
+---
+
+## 7. Run with Docker (locally)
+
+### Build the image
+```bash
+docker build -t flux-image-generator .
+```
+
+### Run (GPU)
+```bash
+docker run --gpus all \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e HUGGINGFACE_HUB_TOKEN=$HUGGINGFACE_HUB_TOKEN \
+  -e S3_BUCKET=$S3_BUCKET -e S3_PREFIX=$S3_PREFIX \
+  -v $(pwd)/outputs:/app/outputs \
+  flux-image-generator \
+  python main.py "a photorealistic cat" -n 1
+```
+
+*Remove `--gpus all` to run on CPU only.*
+
+---
+
+## 8. Deploy to RunPod Serverless
+
+1. Fork or push this repo to GitHub/Bitbucket.
+2. In RunPod ➜ *Serverless* ➜ **Create Worker** ➜ **From GitHub**.
+3. Pick branch `main`, leave build context `/`, Dockerfile `Dockerfile`.
+4. Add environment variables (`OPENAI_API_KEY`, `HUGGINGFACE_HUB_TOKEN`, `AWS_*`, `S3_BUCKET`, etc.).
+5. (Optional) Attach a Network Volume and set:
+   ```
+   HF_HOME=/runpod-volume/hf_cache
+   TRANSFORMERS_CACHE=/runpod-volume/hf_cache
+   ```
+6. Click **Deploy**. After the build shows *Worker is ready* you can submit jobs:
+   ```bash
+   curl -X POST https://api.runpod.ai/v2/<endpoint-id>/run \
+        -H "Content-Type: application/json" \
+        -d '{"input": {"prompt": "a sunset lighthouse", "num_images": 1}}'
+   ```
+   Then poll `/status/<job-id>` until `status":"COMPLETED"`.
+
+The `output.files` array will contain HTTPS URLs like
+`https://<bucket>.s3.<region>.amazonaws.com/<prefix>/image.png`.
+
+---
+
 Happy prompting 🚀
