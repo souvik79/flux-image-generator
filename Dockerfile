@@ -21,4 +21,4 @@ EXPOSE 8000
 
 # Entry point – start FastAPI with Uvicorn
 # Default command for RunPod serverless; it will call our worker.handler
-CMD ["python", "-u", "-m", "runpod"]
+CMD ["python", "-u", "worker.py"]

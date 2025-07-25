@@ -12,9 +12,6 @@ from typing import List
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=False)
-
 from image_generator import FluxImageGenerator
 
 app = FastAPI(title="Flux Image Generator API")

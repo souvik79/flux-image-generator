@@ -9,19 +9,32 @@ loaded automatically from `.env` inside the image.
 from __future__ import annotations
 
 import os
+import logging
+import traceback
 from pathlib import Path
 from typing import Any, Dict, List
 
-from dotenv import load_dotenv
-
-# Attempt to load .env bundled with the image
-load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=False)
-
 from image_generator import FluxImageGenerator  # noqa: E402  pylint: disable=wrong-import-position
 
-# Instantiate once (cold-start) and reuse across invocations
-_GENERATOR = FluxImageGenerator()
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=LOG_LEVEL,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    datefmt="%H:%M:%S",
+    force=True,
+)
+logger = logging.getLogger(__name__)
 
+# Instantiate once (cold-start) and reuse across invocations
+logger.info("Loading model …")
+_GENERATOR = FluxImageGenerator()
+logger.info("Model loaded successfully.")
+
+logger.info("HF token present: %s", bool(os.getenv("HUGGINGFACE_HUB_TOKEN")))
+logger.info("S3 bucket: %s", os.getenv("S3_BUCKET"))
 
 def handler(event: Dict[str, Any]) -> Dict[str, Any]:
     """RunPod will invoke this function with an *event* dict.
@@ -47,8 +60,12 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
     num_images = max(1, min(num_images, 6))
 
     try:
+        logger.info("Generating %s image(s) for prompt: %s", num_images, prompt)
         paths = _GENERATOR.generate(prompt, num_images=num_images, seed=seed)
-    except RuntimeError as exc:  # OOM or other
+        logger.info("Generation finished; %s file(s)", len(paths))
+    except Exception as exc:  # noqa: BLE001 broaden for logging
+        logger.error("Generation failed: %s", exc)
+        logger.debug("%s", traceback.format_exc())
         return {"error": str(exc)}
 
     if paths:
@@ -61,4 +78,11 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
     return {"files": files}
 
 
-# RunPod python runtime looks for `handler` symbol automatically if using default CMD.
+
+# ---------------------------------------------------------------------------
+# When executed directly (e.g., `python -u worker.py`), start the RunPod loop.
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    import runpod
+
+    runpod.serverless.start({"handler": handler})
