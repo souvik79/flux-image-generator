@@ -96,10 +96,19 @@ class FluxImageGenerator:
             from s3_uploader import upload_files  # late import to avoid boto3 overhead if unused
             prefix = os.getenv("S3_PREFIX", base)
             upload_files(bucket, saved_paths, prefix)
+
+            # Build list of S3 URLs that correspond to each file
+            s3_urls = [
+                f"s3://{bucket}/{prefix.rstrip('/')}/{p.name}" if prefix else f"s3://{bucket}/{p.name}"
+                for p in saved_paths
+            ]
+
             # Optional: remove local copies to conserve disk space
             if os.getenv("DELETE_LOCAL_AFTER_S3", "false").lower() == "true":
                 for p in saved_paths:
                     p.unlink(missing_ok=True)
                 saved_paths = []
 
-        return saved_paths
+            return s3_urls  # return remote URLs instead of local paths
+
+        return [str(p) for p in saved_paths]  # return path strings for consistency

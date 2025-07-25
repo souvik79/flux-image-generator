@@ -68,12 +68,13 @@ def handler(event: Dict[str, Any]) -> Dict[str, Any]:
         logger.debug("%s", traceback.format_exc())
         return {"error": str(exc)}
 
-    if paths:
-        files: List[str] = [p.name for p in paths]
-    else:  # deleted locally, assume S3 upload
-        bucket = os.getenv("S3_BUCKET")
-        prefix = os.getenv("S3_PREFIX", "")
-        files = [f"s3://{bucket}/{prefix}"] if bucket else []
+    files: List[str]
+    if isinstance(paths[0], str):
+        # image_generator already returned a list of strings (local paths or S3 URLs)
+        files = paths
+    else:
+        # We got Path objects – return just the filenames
+        files = [p.name for p in paths]
 
     return {"files": files}
 
