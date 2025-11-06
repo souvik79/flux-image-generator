@@ -2,8 +2,8 @@
 Quick utility to verify that the service-account credentials can read a Google
 Sheet.  Usage:
 
-    python test_gsheet.py --creds gtm-tjb7vfmh-n2qzo-88770255066c.json \
-                          --sheet-id 1AbCDEFgHij… [--worksheet Sheet1]
+    python test_gsheet.py --creds <google_service.json> \
+                          --sheet-id <sheet_id> [--worksheet Sheet1]
 
 It prints the first ten rows (as dicts) so you can confirm access.
 """
