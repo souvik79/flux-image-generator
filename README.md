@@ -77,22 +77,22 @@ If `SHEET_ID` is present, `main.py` reads rows (columns: `Prompt`, `Industry`, `
 Assuming you SSH into the pod with:
 
 ```bash
-ssh -p 1690 -i ~/.ssh/id_ed25519 root@193.183.22.55
+ssh -p 1690 -i ~/.ssh/id_ed25322 root@127.0.0.1
 ```
 
 Use `scp` to pull images:
 
 ```bash
-scp -r -P 1690 -i ~/.ssh/id_ed25519 \
-    root@193.183.22.55:/workspace/flux-image-generator/outputs \
+scp -r -P 1690 -i ~/.ssh/id_ed25322 \
+    root@127.0.0.1:/workspace/flux-image-generator/outputs \
     ~/flux_outputs
 ```
 
 or resume-friendly `rsync`:
 
 ```bash
-rsync -avP -e "ssh -p 1690 -i ~/.ssh/id_ed25519" \
-      root@193.183.22.55:/workspace/flux-image-generator/outputs/ \
+rsync -avP -e "ssh -p 1690 -i ~/.ssh/id_ed25322" \
+      root@127.0.0.1:/workspace/flux-image-generator/outputs/ \
       ~/flux_outputs/
 ```
 
